@@ -1,37 +1,11 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-public class Characteristics
+
+public class Characteristic
 {
     [JsonProperty("Вес товара с упаковкой (г)")]
-    public double WeightWithPackaging { get; set; }
-
-    [JsonProperty("Вес товара без упаковки (г)")]
-    public double WeightWithoutPackaging { get; set; }
-
-    [JsonProperty("Высота предмета")]
-    public double Height { get; set; }
-
-    [JsonProperty("Ширина предмета")]
-    public double Width { get; set; }
-
-    [JsonProperty("Ширина упаковки")]
-    public double PackagingWidth { get; set; }
-
-    [JsonProperty("Высота упаковки")]
-    public double PackagingHeight { get; set; }
-
-    [JsonProperty("Длина упаковки")]
-    public double PackagingLength { get; set; }
-
-    [JsonProperty("Количество предметов в упаковке")]
-    public List<string> ItemsInPackaging { get; set; }
-
-    [JsonProperty("Бренд")]
-    public string Brand { get; set; }
-
-    [JsonProperty("Страна производства")]
-    public List<string> CountryOfOrigin { get; set; }
+    public int WeightNetto  { get; set; }
 
     [JsonProperty("Модель")]
     public List<string> Model { get; set; }
@@ -58,10 +32,7 @@ public class Characteristics
     public string Subject { get; set; }
 
     [JsonProperty("Наименование")]
-    public string Name { get; set; }
-
-    [JsonProperty("Описание")]
-    public string Description { get; set; }
+    public string ProductName { get; set; }
 }
 
 public class Size
@@ -103,7 +74,7 @@ public class Data
     public List<Size> Sizes { get; set; }
 
     [JsonProperty("characteristics")]
-    public List<Characteristics> Characteristics { get; set; }
+    public List<Characteristic> Characteristics { get; set; }
 
     [JsonProperty("isProhibited")]
     public bool IsProhibited { get; set; }
@@ -138,3 +109,4 @@ public class ApiResponseProducts
     [JsonProperty("additionalErrors")]
     public object AdditionalErrors { get; set; }
 }
+

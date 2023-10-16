@@ -1,12 +1,10 @@
 ﻿using iTextSharp.text;
 using iTextSharp.text.pdf;
-using Org.BouncyCastle.Asn1.X509;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
@@ -79,7 +77,6 @@ namespace TaskPrint
             try
             {
                 WildberriesApiService apiService = new WildberriesApiService();
-
                 responseData = await apiService.GetSupplyOrdersAsync(supplyId);
 
                 if (responseData.Count == 0)
@@ -409,7 +406,6 @@ namespace TaskPrint
             Document doc = new Document(customPageSize);
             OrderProcessor processor = new OrderProcessor();
             WildberriesApiService apiService = new WildberriesApiService();
-            
 
             string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string saveDirectory = Path.Combine(appDirectory, "Reports");
@@ -444,6 +440,14 @@ namespace TaskPrint
 
 
                 foreach (Order order in groupOrders.All) {
+                    List<string> ProductCodes = new List<string>();
+                    ProductCodes.Add(order.Article);
+
+                    List<Characteristic> productCaracteristics = await apiService.GetProductInfo(ProductCodes);
+                    string ProductName = null;
+                    foreach (Characteristic characteristic in productCaracteristics) { 
+                        if(characteristic.ProductName!= null) { ProductName = characteristic.ProductName; break; }
+                    }
                     
                     doc.NewPage();
                     byte[] imageBytes = Convert.FromBase64String(order.Stickers.File);
@@ -454,29 +458,32 @@ namespace TaskPrint
 
                     doc.NewPage();
 
-                    BarcodeEAN barcode = new BarcodeEAN();
-                    barcode.CodeType = Barcode.EAN13;
-                    barcode.ChecksumText = true;
-                    barcode.GenerateChecksum = false;
-                    barcode.StartStopText = true;
-                    barcode.Code = order.Skus[0];
-                    barcode.BarHeight = 20f;
-                    barcode.X = 2f;
-                    barcode.N = 20f;
+                    BarcodeEAN barcode = new BarcodeEAN
+                    {
+                        CodeType = Barcode.EAN13,
+                        ChecksumText = true,
+                        GenerateChecksum = false,
+                        StartStopText = true,
+                        Code = order.Skus[0],
+                        BarHeight = 14f,
+                        X = 2f,
+                        N = 25f
+                    };
 
                     Image imageBr = barcode.CreateImageWithBarcode(pdfContent, textColor, textColor);
                 
-                    imageBr.SetAbsolutePosition(5, 20);
+                    imageBr.SetAbsolutePosition(5, 10);
                     Image br = Image.GetInstance(imageBr);
                     br.ScaleAbsoluteWidth(40f);
-                    br.ScaleAbsoluteHeight(10f);
+                    br.ScaleAbsoluteHeight(20f);
                     doc.Add(br);
 
                     List<string> pArtList = new List<string>();
                     pArtList.Add(order.Article);
                   
-
-                    string headerText = $"{order.Article} ({order.NmId})";
+                    string headerText = $"{order.Article}";
+                    string headerArticul = $"({order.NmId})";
+                    string headerName = $"{ProductName}";
 
                     AppSettings settings = new AppSettings();
 

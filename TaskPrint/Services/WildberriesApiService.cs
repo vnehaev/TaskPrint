@@ -157,7 +157,7 @@ namespace TaskPrint.Services
             }
         }
 
-        public async Task<List<Data>> GetProductInfo(List<string> articles)
+        public async Task<List<Characteristic>> GetProductInfo(List<string> articles)
         {
             string requestUri = $"content/v1/cards/filter";
 
@@ -173,7 +173,7 @@ namespace TaskPrint.Services
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
                     ApiResponseProducts apiResponse = JsonConvert.DeserializeObject<ApiResponseProducts>(responseData);
-                    return apiResponse.Data;
+                    return apiResponse.Data[0].Characteristics;
                 }
                 else
                 {
