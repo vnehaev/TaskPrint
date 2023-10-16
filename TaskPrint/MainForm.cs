@@ -465,34 +465,37 @@ namespace TaskPrint
                         GenerateChecksum = false,
                         StartStopText = true,
                         Code = order.Skus[0],
-                        BarHeight = 14f,
+                        BarHeight = 20f,
                         X = 2f,
                         N = 25f
                     };
 
                     Image imageBr = barcode.CreateImageWithBarcode(pdfContent, textColor, textColor);
                 
-                    imageBr.SetAbsolutePosition(5, 10);
+                    imageBr.SetAbsolutePosition(3, 5);
                     Image br = Image.GetInstance(imageBr);
-                    br.ScaleAbsoluteWidth(40f);
+                    br.ScaleAbsoluteWidth(45f);
                     br.ScaleAbsoluteHeight(20f);
                     doc.Add(br);
 
                     List<string> pArtList = new List<string>();
                     pArtList.Add(order.Article);
-                  
+
+                    AppSettings settings = new AppSettings();
                     string headerText = $"{order.Article}";
                     string headerArticul = $"({order.NmId})";
                     string headerName = $"{ProductName}";
-
-                    AppSettings settings = new AppSettings();
-
                     string BottomText = $"{settings.GetCompanyName()} ({settings.GetCompanyId()})";
 
                     Phrase aboveText = new Phrase(headerText, smallFontBold);
-                    ColumnText.ShowTextAligned(writer.DirectContent, Element.ALIGN_MIDDLE, aboveText, 2f, 33f, 0);
                     Phrase belowText = new Phrase(BottomText, smallFont);
-                    ColumnText.ShowTextAligned(writer.DirectContent, Element.ALIGN_LEFT, belowText, 3f, 15f, 0);
+                    Phrase productName = new Phrase(headerName, smallFont);
+                    Phrase wbArticel = new Phrase(headerArticul, smallFontBold);
+
+                    ColumnText.ShowTextAligned(writer.DirectContent, Element.ALIGN_LEFT, aboveText, 2f, 35f, 0);
+                    ColumnText.ShowTextAligned(writer.DirectContent, Element.ALIGN_LEFT, wbArticel, 2f, 30f, 0);
+                    ColumnText.ShowTextAligned(writer.DirectContent, Element.ALIGN_LEFT, productName, 2f, 26f, 0);
+                    ColumnText.ShowTextAligned(writer.DirectContent, Element.ALIGN_LEFT, belowText, 2f, 2f, 0);
                 }
                 
 
