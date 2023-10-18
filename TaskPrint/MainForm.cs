@@ -163,112 +163,7 @@ namespace TaskPrint
                 SaveStickersToPdf(selectedOrder);
             }
 
-        }
-
-        private async void PrintSupply(Supply suply)
-        {
-            PrintDocument printDocument = new PrintDocument();
-            OrderProcessor processor = new OrderProcessor();
-
-
-            orders = await GetSupplyOrders(suply.Id);
-            groupOrders = await processor.GetGroupedOrders(orders);
-
-            printDocument.PrintPage += (object sender, PrintPageEventArgs e) =>
-            {
-                Graphics g = e.Graphics;
-
-                Font titleFont = new Font("Arial", 16, FontStyle.Bold);
-                Font headingFont = new Font("Arial", 14, FontStyle.Bold);
-                Font normalFont = new Font("Arial", 12);
-                SolidBrush brush = new SolidBrush(Color.Black);
-
-                float y = 20;
-                float x = 20;
-
-                g.DrawString($"{suply.Id.ToString()}", titleFont, brush, new PointF(x, y));
-
-                y += 40;
-                int totalCount = 0;
-                int global_done = 0;
-
-                foreach (var group in groupOrders.Groups)
-                {
-                    totalCount += group.Value.Count;
-                }
-                totalCount += groupOrders.Other.Count;
-
-                if (groupOrders.Groups != null && groupOrders.Groups.Count > 0)
-                {
-                    g.DrawString("Группы", headingFont, brush, 20, y);
-                    y += 30;
-
-
-                    foreach (var group in groupOrders.Groups)
-                    {
-
-                        g.DrawString($"({group.Value.Count} шт.) {group.Key}", normalFont, brush, 40, y);
-                        y += 20;
-
-                        foreach (var order in group.Value)
-                        {
-                            g.DrawString("☐", normalFont, brush, 60, y);
-                            g.DrawString($"{order.Stickers.PartA} {order.Stickers.PartB}", normalFont, brush, 80, y);
-                            y += 20;
-                        }
-                        global_done += group.Value.Count;
-
-                        g.DrawString($"({global_done} / {totalCount})", normalFont, brush, 60, y);
-                        y += 30;
-                    }
-                }
-
-
-                if (groupOrders.Other != null && groupOrders.Other.Count > 0)
-                {
-                    g.DrawString("Мелочь", headingFont, brush, 20, y);
-                    y += 30;
-
-                    // Create a table header
-                    g.DrawString("№", headingFont, brush, 40, y);
-                    g.DrawString("Номер заказа", headingFont, brush, 100, y);
-                    g.DrawString("В работе", headingFont, brush, 250, y);
-                    g.DrawString("Готово", headingFont, brush, 350, y);
-                    g.DrawString("Название", headingFont, brush, 450, y);
-                    y += 30;
-
-
-                    int index = 1;
-                    foreach (var order in groupOrders.Other)
-                    {
-                        global_done = global_done + 1;
-                        g.DrawString($"{index} ({global_done} / {totalCount})", normalFont, brush, 40, y);
-                        g.DrawString($"{order.Stickers.PartA} {order.Stickers.PartB}", normalFont, brush, 130, y);
-                        g.DrawString("☐", normalFont, brush, 270, y);
-                        g.DrawString("☐", normalFont, brush, 370, y);
-                        g.DrawString(order.Article, normalFont, brush, 450, y);
-                        y += 20;
-                        index++;
-                    }
-                }
-
-            };
-
-            PrintPreviewDialog printPreviewDialog = new PrintPreviewDialog();
-            printPreviewDialog.Document = printDocument;
-
-            //printPreviewDialog.ShowDialog();
-            //PrintDialog printDialog = new PrintDialog();
-            //printDialog.Document = printDocument;
-            //printDialog.AllowSelection = true;
-            //printDialog.UseEXDialog = true;
-            //DialogResult result = printDialog.ShowDialog();
-            //PrintStickers(groupOrders);
-        }
-
-       
-
- 
+        }   
 
         private async Task SaveSupplyToPdfAsync(Supply supply)
         {
@@ -304,8 +199,8 @@ namespace TaskPrint
                 BaseColor textColor = BaseColor.BLACK;
 
                 PdfContentByte pdfContent = writer.DirectContent;
-                float y = doc.PageSize.Height - 20;
-                float x = 20;
+                float y = doc.PageSize.Height - 60;
+                float x = 40;
 
                 pdfContent.BeginText();
                 pdfContent.SetFontAndSize(baseFont, 16);
@@ -313,7 +208,7 @@ namespace TaskPrint
                 pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{supply.Id} ({supply.CreatedAt})", x, y, 0);
                 pdfContent.EndText();
 
-                y -= 40;
+                y -= 20;
                 int totalCount = 0;
                 int global_done = 0;
 
@@ -330,42 +225,60 @@ namespace TaskPrint
                     // Add "Группы" heading
                     pdfContent.BeginText();
                     pdfContent.SetFontAndSize(baseFont, 14);
-                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, "Группы", 20, y, 0);
+                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, "Группы", x, y, 0);
                     pdfContent.EndText();
                     y -= 30;
 
                     // Loop through group orders
                     foreach (var group in groupOrders.Groups)
                     {
+                        if (y < 120)
+                        {
+                            // Если осталось мало места на текущей странице, добавляем новую страницу
+                            doc.NewPage();
+                            y = doc.PageSize.Height - 60;
+                        }
                         pdfContent.BeginText();
                         pdfContent.SetFontAndSize(baseFont, 12);
                         pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({group.Value.Count} шт.) {group.Key}", 40, y, 0);
                         pdfContent.EndText();
                         y -= 20;
+                        x = 60;
 
                         // Loop through orders in the group
                         foreach (var order in group.Value)
                         {
-                            if (y < 20)
+                            if (y < 60)
                             {
                                 // Если осталось мало места на текущей странице, добавляем новую страницу
                                 doc.NewPage();
-                                y = doc.PageSize.Height - 20;
+                                y = doc.PageSize.Height - 60;
                             }
                             pdfContent.BeginText();
                             pdfContent.SetFontAndSize(baseFont, 12);
-                            pdfContent.ShowTextAligned(Element.ALIGN_LEFT, "☐", 60, y, 0);
-                            pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{order.Stickers.PartA} {order.Stickers.PartB}", 80, y, 0);
+                            pdfContent.ShowTextAligned(Element.ALIGN_LEFT, "☐", x - 10, y, 0);
+                            pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{order.Stickers.PartA} {order.Stickers.PartB}", x, y, 0);
+                            x += 100;
+                            float pz = doc.PageSize.Width;
+                            if(pz - x < 100) { x = 60; y -= 20; } else { }
                             pdfContent.EndText();
-                            y -= 20;
                         }
                         global_done += group.Value.Count;
-
+                        
                         pdfContent.BeginText();
                         pdfContent.SetFontAndSize(baseFont, 12);
-                        pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({global_done} / {totalCount})", 60, y, 0);
+                        pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({global_done} / {totalCount})", 40, y-15, 0);
                         pdfContent.EndText();
-                        y -= 30;
+
+                        pdfContent.SetLineWidth(1f);
+                        float x1 =100f;
+                        float x2 = doc.PageSize.Width;
+                        pdfContent.MoveTo(x1, y - 15);
+                        pdfContent.LineTo(x2, y - 15);
+                        pdfContent.Stroke();
+
+
+                        y -= 40;
                     }
                 }
                 int index = 1;
@@ -430,7 +343,7 @@ namespace TaskPrint
                 iTextSharp.text.Font titleFont = new iTextSharp.text.Font(baseFont, 16, iTextSharp.text.Font.BOLD);
                 iTextSharp.text.Font headingFont = new iTextSharp.text.Font(baseFont, 14, iTextSharp.text.Font.NORMAL);
                 iTextSharp.text.Font normalFont = new iTextSharp.text.Font(baseFont, 12);
-                iTextSharp.text.Font smallFont = new iTextSharp.text.Font(baseFont, 4f, iTextSharp.text.Font.NORMAL);
+                iTextSharp.text.Font smallFont = new iTextSharp.text.Font(baseFont, 2f, iTextSharp.text.Font.NORMAL);
                 iTextSharp.text.Font smallFontBold = new iTextSharp.text.Font(baseFont, 4f, iTextSharp.text.Font.BOLD);
                 BaseColor textColor = BaseColor.BLACK;
                 BaseColor barColor = BaseColor.WHITE;
