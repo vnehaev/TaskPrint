@@ -99,6 +99,7 @@
     <Compile Include="Models\Wildberries\Address.cs" />
     <Compile Include="Models\Wildberries\ApiResponse.cs" />
     <Compile Include="Models\Wildberries\ApiResponseProducts.cs" />
+    <Compile Include="Models\Wildberries\Company.cs" />
     <Compile Include="Models\Wildberries\GroupOrderResult.cs" />
     <Compile Include="Models\Wildberries\Order.cs" />
     <Compile Include="Models\Wildberries\OrderSatatus.cs" />

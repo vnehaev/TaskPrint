@@ -33,7 +33,8 @@ namespace TaskPrint
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.printPreviewDialog1 = new System.Windows.Forms.PrintPreviewDialog();
             this.printDocument1 = new System.Drawing.Printing.PrintDocument();
-            this.calendarTasks = new System.Windows.Forms.MonthCalendar();
+            this.CompanyName = new System.Windows.Forms.Label();
+            this.companiesList = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -58,26 +59,39 @@ namespace TaskPrint
             this.printPreviewDialog1.Name = "printPreviewDialog1";
             this.printPreviewDialog1.Visible = false;
             // 
-            // calendarTasks
+            // CompanyName
             // 
-            this.calendarTasks.Location = new System.Drawing.Point(13, 34);
-            this.calendarTasks.Name = "calendarTasks";
-            this.calendarTasks.TabIndex = 3;
-            this.calendarTasks.DateSelected += new System.Windows.Forms.DateRangeEventHandler(this.CalendarTasks_DateSelected);
+            this.CompanyName.AutoSize = true;
+            this.CompanyName.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.CompanyName.Location = new System.Drawing.Point(12, 34);
+            this.CompanyName.Name = "CompanyName";
+            this.CompanyName.Size = new System.Drawing.Size(0, 20);
+            this.CompanyName.TabIndex = 5;
+            // 
+            // companiesList
+            // 
+            this.companiesList.FormattingEnabled = true;
+            this.companiesList.Location = new System.Drawing.Point(12, 61);
+            this.companiesList.Name = "companiesList";
+            this.companiesList.Size = new System.Drawing.Size(164, 21);
+            this.companiesList.TabIndex = 6;
+            this.companiesList.SelectedIndexChanged += new System.EventHandler(this.companiesList_SelectedIndexChanged);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1251, 531);
+            this.Controls.Add(this.companiesList);
+            this.Controls.Add(this.CompanyName);
             this.Controls.Add(this.dataGridView1);
-            this.Controls.Add(this.calendarTasks);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Печать заданий";
             this.Load += new System.EventHandler(this.MainForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -85,7 +99,8 @@ namespace TaskPrint
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.PrintPreviewDialog printPreviewDialog1;
         private System.Drawing.Printing.PrintDocument printDocument1;
-        private System.Windows.Forms.MonthCalendar calendarTasks;
+        private System.Windows.Forms.Label CompanyName;
+        private System.Windows.Forms.ComboBox companiesList;
     }
 }
 

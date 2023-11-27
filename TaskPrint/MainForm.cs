@@ -24,26 +24,42 @@ namespace TaskPrint
         private List<Order> allOrders = new List<Order>();
         private List<Order> orders = new List<Order>();
         private GroupOrderResult groupOrders = new GroupOrderResult();
+        private AppSettings _appSettings;
+        private Company _selectedCompany;
 
-        public MainForm()
+        public MainForm(AppSettings appSettings)
         {
+            _appSettings = appSettings;
+            _selectedCompany = appSettings.GetSelectedCompany();
             InitializeComponent();
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            long todayDate = ConvertToUnixTimestamp(calendarTasks.SelectionStart);
-            LoadData(todayDate);
+            if(_appSettings.GetAllCompanies().Count == 1)
+            {
+                CompanyName.Text = _selectedCompany.Name;
+                companiesList.Visible = false;
+            }
+            else
+            {
+                companiesList.Visible = true;
+                companiesList.DataSource = _appSettings.GetAllCompanies();
+                companiesList.DisplayMember = "Name";
+                companiesList.ValueMember = "Id";
+                companiesList.SelectedIndexChanged += (s, ev) =>
+                {
+                    _selectedCompany = (Company)companiesList.SelectedItem;
+                    _appSettings.SetSelectedCompany(_selectedCompany);
+                    CompanyName.Text = _selectedCompany.Name;
+                };
+            }   
+            
+            LoadData();
         }
 
-        private void CalendarTasks_DateSelected(object sender, DateRangeEventArgs e)
-        {
-            selectedDate = calendarTasks.SelectionStart;
-            long timestamp = ConvertToUnixTimestamp(selectedDate);
-            LoadData(timestamp);
-        }
 
-        private async void LoadData(long selectedDate)
+        private async void LoadData()
         {
             try
             {
@@ -53,7 +69,6 @@ namespace TaskPrint
 
                 if (responseData.Count == 0)
                 {
-                    dataGridView1.Rows.Clear();
                     MessageBox.Show("Нет сборочных заданий.", "Нет заявок", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
@@ -66,7 +81,7 @@ namespace TaskPrint
             }
             catch (Exception)
             {
-                MessageBox.Show("Нет данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Загрузка данных для отображения заданий.", "Ждите", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -81,7 +96,6 @@ namespace TaskPrint
 
                 if (responseData.Count == 0)
                 {
-                    dataGridView1.Rows.Clear();
                     MessageBox.Show("Нет сборочных заданий.", "Нет заявок", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
@@ -99,7 +113,10 @@ namespace TaskPrint
 
         private void PopulateSupplyDataGridView(List<Supply> suplies)
         {
-            dataGridView1.Rows.Clear();
+            if (dataGridView1.Rows.Count > 0)
+            {
+                dataGridView1.Rows.RemoveAt(0);
+            }
             dataGridView1.AutoGenerateColumns = false;
             dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dataGridView1.MultiSelect = false;
@@ -181,7 +198,7 @@ namespace TaskPrint
             string filePath = Path.Combine(saveDirectory, fileName);
 
             orders = await GetSupplyOrders(supply.Id);
-            groupOrders = await processor.GetGroupedOrders(orders);
+            groupOrders = await processor.GetGroupedOrders(orders, _appSettings);
 
             string fontFileName = "arialuni.ttf";
             string fontFilePath = Path.Combine("Fonts", fontFileName);
@@ -331,7 +348,7 @@ namespace TaskPrint
             string filePath = Path.Combine(saveDirectory, fileName);
 
             orders = await GetSupplyOrders(supply.Id);
-            groupOrders = await processor.GetGroupedOrders(orders);
+            groupOrders = await processor.GetGroupedOrders(orders, _appSettings);
 
             string fontFileName = "arialuni.ttf";
             string fontFilePath = Path.Combine("Fonts", fontFileName);
@@ -398,7 +415,7 @@ namespace TaskPrint
                     string headerText = $"{order.Article}";
                     string headerArticul = $"({order.NmId})";
                     string headerName = $"{ProductName}";
-                    string BottomText = $"{settings.GetCompanyName()} ({settings.GetCompanyId()})";
+                    string BottomText = $"{_selectedCompany.Name} ({_selectedCompany.Id})";
 
                     Phrase aboveText = new Phrase(headerText, smallFontBold);
                     Phrase belowText = new Phrase(BottomText, smallFont);
@@ -424,6 +441,11 @@ namespace TaskPrint
         private long ConvertToUnixTimestamp(DateTime dateTime)
         {
             return ((DateTimeOffset)dateTime).ToUnixTimeSeconds();
+        }
+
+        private void companiesList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            LoadData();
         }
     }
 

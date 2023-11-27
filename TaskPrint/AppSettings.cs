@@ -1,39 +1,33 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using TaskPrint.Models.Wildberries;
 
 namespace TaskPrint
 {
-    class AppSettings
+    public class AppSettings
     {
-        private string apiKeyFilePath = "api_key.txt";
-        private string companyName = "ООО Вектор";
-        private string companyId = "85385";
+        private List<Company> companies = new List<Company>();
+        private Company selectedCompany = new Company();
 
 
-        public string GetApiKey()
+        public void AddCompany(Company company)
         {
-            if (File.Exists(apiKeyFilePath))
-            {
-                return File.ReadAllText(apiKeyFilePath);
-            }
-            else
-            {
-                return null;
-            }
+            companies.Add(company);
         }
 
-        public void SetApiKey(string apiKey)
+        public List<Company> GetAllCompanies()
         {
-            File.WriteAllText(apiKeyFilePath, apiKey);
+           return companies;
         }
 
-        public string GetCompanyName()
+        public void SetSelectedCompany(Company company)
         {
-            return companyName;
+            selectedCompany = company;
         }
-
-        public string GetCompanyId()
+        
+        public Company GetSelectedCompany()
         {
-            return companyId;
-        }
+            return selectedCompany;
+        }   
     }
 }
