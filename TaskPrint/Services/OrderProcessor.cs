@@ -7,13 +7,12 @@ namespace TaskPrint.Services
 {
     internal class OrderProcessor
     {
-        public async Task<GroupOrderResult> GetGroupedOrders(List<Order> unsortedOrders, AppSettings appSettings)
+        public async Task<GroupOrderResult> GetGroupedOrders(List<Order> unsortedOrders, Company selectedCompany)
         {
             Dictionary<string, List<Order>> groupedByName = new Dictionary<string, List<Order>>();
-            Company company = appSettings.GetSelectedCompany();
-            string apiKey = company.ApiKey;
+            string apiKey = selectedCompany.ApiKey;
 
-            WildberriesApiService service = new WildberriesApiService();
+            WildberriesApiService service = new WildberriesApiService(selectedCompany);
 
             List<long> ordersIds = unsortedOrders.Select(order => order.Id).ToList();
 

@@ -12,13 +12,11 @@ namespace TaskPrint.Services
     class WildberriesApiService
     {
         private readonly HttpClient _httpClient;
-        private readonly string _apiKey= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NJRCI6ImM1YmYzMGY2LTBiMTUtNDQ5My1hNDhiLTkyYzNlYTA3ZmRkOCJ9.71YlmoQopYuGL4JbqfA39iywEenqxBoUXU1sOuiEg4M";
-
-        public WildberriesApiService()
+        public WildberriesApiService(Company currentCompany)
         {
+
             _httpClient = new HttpClient();
-/*            _apiKey = apiKey;*/
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {currentCompany.ApiKey}");
             _httpClient.BaseAddress = new Uri("https://suppliers-api.wildberries.ru");
         }
 

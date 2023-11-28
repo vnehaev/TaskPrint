@@ -14,19 +14,15 @@ namespace TaskPrint
         static void Main()
         {
             AppSettings appSettings = new AppSettings();
-            Company Vector = new Company();
-            Vector.Name = "ООО Вектор";
-            Vector.Id = "85385";
-            Vector.ApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NJRCI6ImM1YmYzMGY2LTBiMTUtNDQ5My1hNDhiLTkyYzNlYTA3ZmRkOCJ9.71YlmoQopYuGL4JbqfA39iywEenqxBoUXU1sOuiEg4M";
 
-            Company Vector1 = new Company();
-            Vector1.Name = "ООО Вектор-1";
-            Vector1.Id = "85385";
-            Vector1.ApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NJRCI6ImM1YmYzMGY2LTBiMTUtNDQ5My1hNDhiLTkyYzNlYTA3ZmRkOCJ9.71YlmoQopYuGL4JbqfA39iywEenqxBoUXU1sOuiEg4M";
+            Company Company1 = new Company();
+            Company1.Name = "ООО Вектор";
+            Company1.Id = "85385";
+            Company1.ApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NJRCI6ImM1YmYzMGY2LTBiMTUtNDQ5My1hNDhiLTkyYzNlYTA3ZmRkOCJ9.71YlmoQopYuGL4JbqfA39iywEenqxBoUXU1sOuiEg4M";
 
-            appSettings.AddCompany(Vector);
-            appSettings.AddCompany(Vector1);
-            appSettings.SetSelectedCompany(Vector);
+          
+            appSettings.AddCompany(Company1);
+            appSettings.SetSelectedCompany(Company1);
             
 
             Application.EnableVisualStyles();

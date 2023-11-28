@@ -2,6 +2,7 @@
 using iTextSharp.text.pdf;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
@@ -19,26 +20,22 @@ namespace TaskPrint
 {
     public partial class MainForm : Form
     {
-        private DateTime selectedDate;
-        private int currentPageIndex = 0;
-        private List<Order> allOrders = new List<Order>();
         private List<Order> orders = new List<Order>();
         private GroupOrderResult groupOrders = new GroupOrderResult();
-        private AppSettings _appSettings;
-        private Company _selectedCompany;
+        private AppSettings _appSettings = new AppSettings();
 
         public MainForm(AppSettings appSettings)
         {
             _appSettings = appSettings;
-            _selectedCompany = appSettings.GetSelectedCompany();
             InitializeComponent();
+            CompanyName.Text = _appSettings.GetSelectedCompany().Name;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
             if(_appSettings.GetAllCompanies().Count == 1)
             {
-                CompanyName.Text = _selectedCompany.Name;
+                CompanyName.Text = _appSettings.GetAllCompanies()[0].Name;
                 companiesList.Visible = false;
             }
             else
@@ -49,49 +46,61 @@ namespace TaskPrint
                 companiesList.ValueMember = "Id";
                 companiesList.SelectedIndexChanged += (s, ev) =>
                 {
-                    _selectedCompany = (Company)companiesList.SelectedItem;
-                    _appSettings.SetSelectedCompany(_selectedCompany);
-                    CompanyName.Text = _selectedCompany.Name;
+                    Company selectedCompany = (Company)companiesList.SelectedItem;
+                    _appSettings.SetSelectedCompany(selectedCompany);
+                    CompanyName.Text = selectedCompany.Name;
                 };
             }   
-            
             LoadData();
         }
 
 
         private async void LoadData()
         {
+            dataGridView1.DataSource = null;
+            groupOrders = new GroupOrderResult();
+            orders = new List<Order>();
+            Company selectedCompany = _appSettings.GetSelectedCompany();
+            CompanyName.Name = selectedCompany.Name;
+            
+
             try
             {
-                WildberriesApiService apiService = new WildberriesApiService();
+                WildberriesApiService apiService = new WildberriesApiService(selectedCompany);
 
                 List<Supply> responseData = await apiService.GetSuppliesAsync();
 
                 if (responseData.Count == 0)
                 {
-                    MessageBox.Show("Нет сборочных заданий.", "Нет заявок", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Невозможно получить задания.", "Нет заданий", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else
                 {
                     responseData = responseData.OrderByDescending(supply => supply.CreatedAt).ToList();
                     responseData = responseData.Where(suply => suply.Done == false).ToList();
-                    PopulateSupplyDataGridView(responseData);
-
+                    if (responseData.Count > 0) { 
+                        PopulateSupplyDataGridView(responseData);
+                    }
+                    else {
+                        MessageBox.Show("Нет сборочных заданий для сборки.", "Нет заданий", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show("Загрузка данных для отображения заданий.", "Ждите", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Загрузка данных для отображения заданий. {ex.Message}", "Ждите", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+
         }
 
         private async Task<List<Order>> GetSupplyOrders(string supplyId)
         {
             List<Order> responseData = new List<Order>();
+            Company selectedCompany = _appSettings.GetSelectedCompany();
 
             try
             {
-                WildberriesApiService apiService = new WildberriesApiService();
+                WildberriesApiService apiService = new WildberriesApiService(selectedCompany);
                 responseData = await apiService.GetSupplyOrdersAsync(supplyId);
 
                 if (responseData.Count == 0)
@@ -113,46 +122,47 @@ namespace TaskPrint
 
         private void PopulateSupplyDataGridView(List<Supply> suplies)
         {
-            if (dataGridView1.Rows.Count > 0)
+            dataGridView1.DataSource = null;
+            //check if exist column with button
+            if (dataGridView1.Columns.Contains("PrintButton") == false)
             {
-                dataGridView1.Rows.RemoveAt(0);
+                dataGridView1.AutoGenerateColumns = false;
+                dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+                dataGridView1.MultiSelect = false;
+                dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                dataGridView1.CellContentClick += DataGridView1_CellContentClickAsync;
+
+                DataGridViewTextBoxColumn createdAtColumn = new DataGridViewTextBoxColumn();
+                createdAtColumn.DataPropertyName = "CreatedAt";
+                createdAtColumn.HeaderText = "Created At";
+                createdAtColumn.ReadOnly = true;
+                dataGridView1.Columns.Add(createdAtColumn);
+
+                DataGridViewTextBoxColumn idColumn = new DataGridViewTextBoxColumn();
+                idColumn.DataPropertyName = "Id";
+                idColumn.HeaderText = "ID";
+                idColumn.ReadOnly = true;
+                dataGridView1.Columns.Add(idColumn);
+
+                DataGridViewTextBoxColumn nameColumn = new DataGridViewTextBoxColumn();
+                nameColumn.DataPropertyName = "Name";
+                nameColumn.HeaderText = "Name";
+                nameColumn.ReadOnly = true;
+                dataGridView1.Columns.Add(nameColumn);
+
+                DataGridViewTextBoxColumn doneColumn = new DataGridViewTextBoxColumn();
+                doneColumn.DataPropertyName = "Done";
+                doneColumn.HeaderText = "Done";
+                doneColumn.ReadOnly = true;
+                dataGridView1.Columns.Add(doneColumn);
+
+                DataGridViewButtonColumn printButtonColumn = new DataGridViewButtonColumn();
+                printButtonColumn.HeaderText = "Печать";
+                printButtonColumn.Name = "PrintButton";
+                printButtonColumn.Text = "Печать";
+                printButtonColumn.UseColumnTextForButtonValue = true;
+                dataGridView1.Columns.Add(printButtonColumn);
             }
-            dataGridView1.AutoGenerateColumns = false;
-            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridView1.MultiSelect = false;
-            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dataGridView1.CellContentClick += DataGridView1_CellContentClickAsync;
-
-            DataGridViewTextBoxColumn createdAtColumn = new DataGridViewTextBoxColumn();
-            createdAtColumn.DataPropertyName = "CreatedAt";
-            createdAtColumn.HeaderText = "Created At";
-            createdAtColumn.ReadOnly = true;
-            dataGridView1.Columns.Add(createdAtColumn);
-
-            DataGridViewTextBoxColumn idColumn = new DataGridViewTextBoxColumn();
-            idColumn.DataPropertyName = "Id";
-            idColumn.HeaderText = "ID";
-            idColumn.ReadOnly = true;
-            dataGridView1.Columns.Add(idColumn);
-
-            DataGridViewTextBoxColumn nameColumn = new DataGridViewTextBoxColumn();
-            nameColumn.DataPropertyName = "Name";
-            nameColumn.HeaderText = "Name";
-            nameColumn.ReadOnly = true;
-            dataGridView1.Columns.Add(nameColumn);
-
-            DataGridViewTextBoxColumn doneColumn = new DataGridViewTextBoxColumn();
-            doneColumn.DataPropertyName = "Done";
-            doneColumn.HeaderText = "Done";
-            doneColumn.ReadOnly = true;
-            dataGridView1.Columns.Add(doneColumn);
-
-            DataGridViewButtonColumn printButtonColumn = new DataGridViewButtonColumn();
-            printButtonColumn.HeaderText = "Печать";
-            printButtonColumn.Name = "PrintButton";
-            printButtonColumn.Text = "Печать";
-            printButtonColumn.UseColumnTextForButtonValue = true;
-            dataGridView1.Columns.Add(printButtonColumn);
 
 
 
@@ -186,6 +196,7 @@ namespace TaskPrint
         {
             Document doc = new Document();
             OrderProcessor processor = new OrderProcessor();
+            Company selectedCompany = _appSettings.GetSelectedCompany();
 
             string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string saveDirectory = Path.Combine(appDirectory, "Reports");
@@ -198,7 +209,7 @@ namespace TaskPrint
             string filePath = Path.Combine(saveDirectory, fileName);
 
             orders = await GetSupplyOrders(supply.Id);
-            groupOrders = await processor.GetGroupedOrders(orders, _appSettings);
+            groupOrders = await processor.GetGroupedOrders(orders, selectedCompany);
 
             string fontFileName = "arialuni.ttf";
             string fontFilePath = Path.Combine("Fonts", fontFileName);
@@ -335,7 +346,9 @@ namespace TaskPrint
             iTextSharp.text.Rectangle customPageSize = new iTextSharp.text.Rectangle(50f, 40f);
             Document doc = new Document(customPageSize);
             OrderProcessor processor = new OrderProcessor();
-            WildberriesApiService apiService = new WildberriesApiService();
+            Company selectedCompany = _appSettings.GetSelectedCompany();
+
+            WildberriesApiService apiService = new WildberriesApiService(selectedCompany);
 
             string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string saveDirectory = Path.Combine(appDirectory, "Reports");
@@ -348,7 +361,7 @@ namespace TaskPrint
             string filePath = Path.Combine(saveDirectory, fileName);
 
             orders = await GetSupplyOrders(supply.Id);
-            groupOrders = await processor.GetGroupedOrders(orders, _appSettings);
+            groupOrders = await processor.GetGroupedOrders(orders, selectedCompany);
 
             string fontFileName = "arialuni.ttf";
             string fontFilePath = Path.Combine("Fonts", fontFileName);
@@ -415,7 +428,7 @@ namespace TaskPrint
                     string headerText = $"{order.Article}";
                     string headerArticul = $"({order.NmId})";
                     string headerName = $"{ProductName}";
-                    string BottomText = $"{_selectedCompany.Name} ({_selectedCompany.Id})";
+                    string BottomText = $"{selectedCompany.Name} ({selectedCompany.Id})";
 
                     Phrase aboveText = new Phrase(headerText, smallFontBold);
                     Phrase belowText = new Phrase(BottomText, smallFont);
@@ -444,6 +457,13 @@ namespace TaskPrint
         }
 
         private void companiesList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Company selectedCompany = (Company)companiesList.SelectedItem;
+            _appSettings.SetSelectedCompany(selectedCompany);
+            LoadData();
+        }
+
+        private void button1_MouseClick(object sender, MouseEventArgs e)
         {
             LoadData();
         }

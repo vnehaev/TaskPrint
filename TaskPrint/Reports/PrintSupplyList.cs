@@ -26,11 +26,11 @@ namespace TaskPrint.Reports
             Supply = supply;
         }
 
-        private async void GetSupplyOrders(string supplyId)
+        private async void GetSupplyOrders(string supplyId, Company selectedCompany)
         {
             try
             {
-                WildberriesApiService apiService = new WildberriesApiService();
+                WildberriesApiService apiService = new WildberriesApiService(selectedCompany);
                 Orders = await apiService.GetSupplyOrdersAsync(supplyId);
             }
             catch (Exception)

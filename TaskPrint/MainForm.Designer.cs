@@ -33,8 +33,9 @@ namespace TaskPrint
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.printPreviewDialog1 = new System.Windows.Forms.PrintPreviewDialog();
             this.printDocument1 = new System.Drawing.Printing.PrintDocument();
-            this.CompanyName = new System.Windows.Forms.Label();
             this.companiesList = new System.Windows.Forms.ComboBox();
+            this.CompanyName = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -59,31 +60,41 @@ namespace TaskPrint
             this.printPreviewDialog1.Name = "printPreviewDialog1";
             this.printPreviewDialog1.Visible = false;
             // 
-            // CompanyName
-            // 
-            this.CompanyName.AutoSize = true;
-            this.CompanyName.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.CompanyName.Location = new System.Drawing.Point(12, 34);
-            this.CompanyName.Name = "CompanyName";
-            this.CompanyName.Size = new System.Drawing.Size(0, 20);
-            this.CompanyName.TabIndex = 5;
-            // 
             // companiesList
             // 
             this.companiesList.FormattingEnabled = true;
-            this.companiesList.Location = new System.Drawing.Point(12, 61);
+            this.companiesList.Location = new System.Drawing.Point(12, 50);
             this.companiesList.Name = "companiesList";
             this.companiesList.Size = new System.Drawing.Size(164, 21);
             this.companiesList.TabIndex = 6;
             this.companiesList.SelectedIndexChanged += new System.EventHandler(this.companiesList_SelectedIndexChanged);
+            // 
+            // CompanyName
+            // 
+            this.CompanyName.AutoSize = true;
+            this.CompanyName.Location = new System.Drawing.Point(12, 9);
+            this.CompanyName.Name = "CompanyName";
+            this.CompanyName.Size = new System.Drawing.Size(0, 13);
+            this.CompanyName.TabIndex = 8;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(12, 78);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(164, 23);
+            this.button1.TabIndex = 9;
+            this.button1.Text = "Обновить";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.button1_MouseClick);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1251, 531);
-            this.Controls.Add(this.companiesList);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.CompanyName);
+            this.Controls.Add(this.companiesList);
             this.Controls.Add(this.dataGridView1);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -99,8 +110,9 @@ namespace TaskPrint
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.PrintPreviewDialog printPreviewDialog1;
         private System.Drawing.Printing.PrintDocument printDocument1;
-        private System.Windows.Forms.Label CompanyName;
         private System.Windows.Forms.ComboBox companiesList;
+        private System.Windows.Forms.Label CompanyName;
+        private System.Windows.Forms.Button button1;
     }
 }
 
