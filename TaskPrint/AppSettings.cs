@@ -6,8 +6,8 @@ namespace TaskPrint
 {
     public class AppSettings
     {
-        private List<Company> companies = new List<Company>();
-        private Company selectedCompany = new Company();
+        public List<Company> companies = new List<Company>();
+        public Company selectedCompany = new Company();
 
 
         public void AddCompany(Company company)

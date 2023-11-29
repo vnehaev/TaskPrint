@@ -44,10 +44,12 @@ namespace TaskPrint
             this.dataGridView1.AllowUserToAddRows = false;
             this.dataGridView1.AllowUserToDeleteRows = false;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(253, 34);
+            this.dataGridView1.Location = new System.Drawing.Point(337, 42);
+            this.dataGridView1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
-            this.dataGridView1.Size = new System.Drawing.Size(986, 485);
+            this.dataGridView1.RowHeadersWidth = 51;
+            this.dataGridView1.Size = new System.Drawing.Size(1315, 597);
             this.dataGridView1.TabIndex = 4;
             // 
             // printPreviewDialog1
@@ -63,25 +65,28 @@ namespace TaskPrint
             // companiesList
             // 
             this.companiesList.FormattingEnabled = true;
-            this.companiesList.Location = new System.Drawing.Point(12, 50);
+            this.companiesList.Location = new System.Drawing.Point(16, 62);
+            this.companiesList.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.companiesList.Name = "companiesList";
-            this.companiesList.Size = new System.Drawing.Size(164, 21);
+            this.companiesList.Size = new System.Drawing.Size(217, 24);
             this.companiesList.TabIndex = 6;
             this.companiesList.SelectedIndexChanged += new System.EventHandler(this.companiesList_SelectedIndexChanged);
             // 
             // CompanyName
             // 
             this.CompanyName.AutoSize = true;
-            this.CompanyName.Location = new System.Drawing.Point(12, 9);
+            this.CompanyName.Location = new System.Drawing.Point(16, 11);
+            this.CompanyName.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.CompanyName.Name = "CompanyName";
-            this.CompanyName.Size = new System.Drawing.Size(0, 13);
+            this.CompanyName.Size = new System.Drawing.Size(0, 16);
             this.CompanyName.TabIndex = 8;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(12, 78);
+            this.button1.Location = new System.Drawing.Point(16, 96);
+            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(164, 23);
+            this.button1.Size = new System.Drawing.Size(219, 28);
             this.button1.TabIndex = 9;
             this.button1.Text = "Обновить";
             this.button1.UseVisualStyleBackColor = true;
@@ -89,13 +94,15 @@ namespace TaskPrint
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1251, 531);
+            this.ClientSize = new System.Drawing.Size(1668, 654);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.CompanyName);
             this.Controls.Add(this.companiesList);
             this.Controls.Add(this.dataGridView1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Печать заданий";
