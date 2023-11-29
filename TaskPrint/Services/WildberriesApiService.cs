@@ -171,7 +171,14 @@ namespace TaskPrint.Services
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
                     ApiResponseProducts apiResponse = JsonConvert.DeserializeObject<ApiResponseProducts>(responseData);
-                    return apiResponse.Data[0].Characteristics;
+                    foreach(Data item in apiResponse.Data)
+                    {
+                        if(item.VendorCode == articles[0])
+                        {
+                            return item.Characteristics;
+                        }
+                    }
+                    throw new Exception($"Не найден артикул продавца: {response.StatusCode}");
                 }
                 else
                 {
