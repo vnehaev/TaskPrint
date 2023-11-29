@@ -45,7 +45,7 @@ namespace TaskPrint
             this.dataGridView1.AllowUserToDeleteRows = false;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Location = new System.Drawing.Point(337, 42);
-            this.dataGridView1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dataGridView1.Margin = new System.Windows.Forms.Padding(4);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
             this.dataGridView1.RowHeadersWidth = 51;
@@ -66,7 +66,7 @@ namespace TaskPrint
             // 
             this.companiesList.FormattingEnabled = true;
             this.companiesList.Location = new System.Drawing.Point(16, 62);
-            this.companiesList.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.companiesList.Margin = new System.Windows.Forms.Padding(4);
             this.companiesList.Name = "companiesList";
             this.companiesList.Size = new System.Drawing.Size(217, 24);
             this.companiesList.TabIndex = 6;
@@ -84,7 +84,7 @@ namespace TaskPrint
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(16, 96);
-            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(219, 28);
             this.button1.TabIndex = 9;
@@ -102,10 +102,10 @@ namespace TaskPrint
             this.Controls.Add(this.companiesList);
             this.Controls.Add(this.dataGridView1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Печать заданий";
+            this.Text = "Печать заданий (v1.5)";
             this.Load += new System.EventHandler(this.MainForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
