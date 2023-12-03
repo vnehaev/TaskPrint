@@ -44,8 +44,10 @@ namespace TaskPrint.Services
             }
         }
 
-        public async Task<List<Supply>> GetSuppliesAsync(int limit = 1000, int next = 0)
+        public async Task<ApiResponseSupplies> GetSuppliesAsync(int limit = 1000, long next = 0)
         {
+
+
             try
             {
                 string requestUri = $"/api/v3/supplies?limit={limit}&next={next}";
@@ -55,7 +57,7 @@ namespace TaskPrint.Services
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
                     ApiResponseSupplies apiResponse = JsonConvert.DeserializeObject<ApiResponseSupplies>(responseData);
-                    return apiResponse.Supplies;
+                    return apiResponse;
                 }
                 else
                 {

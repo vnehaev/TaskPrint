@@ -60,6 +60,10 @@ namespace TaskPrint
             dataGridView1.DataSource = null;
             groupOrders = new GroupOrderResult();
             orders = new List<Order>();
+            List<Supply> responseData = new List<Supply>();
+            long next = 0;
+            int limit = 1000;
+            ApiResponseSupplies apiResponse = new ApiResponseSupplies();
             Company selectedCompany = _appSettings.GetSelectedCompany();
             CompanyName.Name = selectedCompany.Name;
             
@@ -68,7 +72,18 @@ namespace TaskPrint
             {
                 WildberriesApiService apiService = new WildberriesApiService(selectedCompany);
 
-                List<Supply> responseData = await apiService.GetSuppliesAsync();
+                apiResponse = await apiService.GetSuppliesAsync();
+                responseData = apiResponse.Supplies;
+                next = apiResponse.Next;
+                if(next != 0)
+                {
+                    while (next != 0)
+                    {
+                        apiResponse = await apiService.GetSuppliesAsync(limit, (long)next);
+                        responseData.AddRange(apiResponse.Supplies);
+                        next = apiResponse.Next;
+                    }
+                }
 
                 if (responseData.Count == 0)
                 {
@@ -76,8 +91,18 @@ namespace TaskPrint
                 }
                 else
                 {
+
                     responseData = responseData.OrderByDescending(supply => supply.CreatedAt).ToList();
-                    responseData = responseData.Where(suply => suply.Done == false).ToList();
+                    if (onlyUnDone.Checked == true)
+                    {
+                        responseData = responseData.Where(suply => suply.Done == false).OrderByDescending(supply => supply.CreatedAt).ToList();
+
+                    }
+                    else {
+                        //response data sorted by date
+                        responseData = responseData.OrderByDescending(supply => supply.CreatedAt).ToList();
+                    }
+                    
                     if (responseData.Count > 0) { 
                         PopulateSupplyDataGridView(responseData);
                     }
@@ -464,6 +489,11 @@ namespace TaskPrint
         }
 
         private void button1_MouseClick(object sender, MouseEventArgs e)
+        {
+            LoadData();
+        }
+
+        private void onlyUnDone_Click(object sender, EventArgs e)
         {
             LoadData();
         }
