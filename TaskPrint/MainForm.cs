@@ -390,23 +390,19 @@ namespace TaskPrint
 
             string fontFileName = "arialuni.ttf";
             string fontFilePath = Path.Combine("Fonts", fontFileName);
-
+            PdfWriter writer = PdfWriter.GetInstance(doc, new FileStream(filePath, FileMode.Create));
+            BaseFont baseFont = BaseFont.CreateFont(fontFilePath, BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+            iTextSharp.text.Font titleFont = new iTextSharp.text.Font(baseFont, 16, iTextSharp.text.Font.BOLD);
+            iTextSharp.text.Font headingFont = new iTextSharp.text.Font(baseFont, 14, iTextSharp.text.Font.NORMAL);
+            iTextSharp.text.Font normalFont = new iTextSharp.text.Font(baseFont, 12);
+            iTextSharp.text.Font smallFont = new iTextSharp.text.Font(baseFont, 2f, iTextSharp.text.Font.NORMAL);
+            iTextSharp.text.Font smallFontBold = new iTextSharp.text.Font(baseFont, 4f, iTextSharp.text.Font.BOLD);
+            BaseColor textColor = BaseColor.BLACK;
+            BaseColor barColor = BaseColor.WHITE;
+            doc.Open();
+            PdfContentByte pdfContent = writer.DirectContent;
             try
             {
-                PdfWriter writer = PdfWriter.GetInstance(doc, new FileStream(filePath, FileMode.Create));
-                BaseFont baseFont = BaseFont.CreateFont(fontFilePath, BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
-                iTextSharp.text.Font titleFont = new iTextSharp.text.Font(baseFont, 16, iTextSharp.text.Font.BOLD);
-                iTextSharp.text.Font headingFont = new iTextSharp.text.Font(baseFont, 14, iTextSharp.text.Font.NORMAL);
-                iTextSharp.text.Font normalFont = new iTextSharp.text.Font(baseFont, 12);
-                iTextSharp.text.Font smallFont = new iTextSharp.text.Font(baseFont, 2f, iTextSharp.text.Font.NORMAL);
-                iTextSharp.text.Font smallFontBold = new iTextSharp.text.Font(baseFont, 4f, iTextSharp.text.Font.BOLD);
-                BaseColor textColor = BaseColor.BLACK;
-                BaseColor barColor = BaseColor.WHITE;
-                doc.Open();
-                PdfContentByte pdfContent = writer.DirectContent;
-
-
-
                 foreach (Order order in groupOrders.All) {
                     List<string> ProductCodes = new List<string>();
                     ProductCodes.Add(order.Article);
@@ -415,6 +411,10 @@ namespace TaskPrint
                     string ProductName = null;
                     foreach (Characteristic characteristic in productCaracteristics) { 
                         if(characteristic.ProductName!= null) { ProductName = characteristic.ProductName; break; }
+                    }
+
+                    if(ProductName == null) { 
+                        ProductName = order.Article; 
                     }
                     
                     doc.NewPage();
@@ -472,6 +472,7 @@ namespace TaskPrint
             }
             catch (Exception ex)
             {
+                doc.Close();
                 MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

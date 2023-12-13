@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 public class Characteristic
 {
     [JsonProperty("Вес товара с упаковкой (г)")]
-    public int WeightNetto  { get; set; }
+    public float WeightNetto  { get; set; }
 
     [JsonProperty("Модель")]
     public List<string> Model { get; set; }
