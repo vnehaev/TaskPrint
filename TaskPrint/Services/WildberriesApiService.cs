@@ -157,7 +157,7 @@ namespace TaskPrint.Services
             }
         }
 
-        public async Task<List<Characteristic>> GetProductInfo(List<string> articles)
+        public async Task<Data> GetProductInfo(List<string> articles)
         {
             string requestUri = $"content/v1/cards/filter";
 
@@ -177,7 +177,7 @@ namespace TaskPrint.Services
                     {
                         if(item.VendorCode == articles[0])
                         {
-                            return item.Characteristics;
+                            return item;
                         }
                     }
                     throw new Exception($"Не найден артикул продавца: {response.StatusCode}");

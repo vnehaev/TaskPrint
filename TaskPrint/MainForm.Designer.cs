@@ -37,6 +37,7 @@ namespace TaskPrint
             this.CompanyName = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.onlyUnDone = new System.Windows.Forms.CheckBox();
+            this.showPhotoCheckbox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -81,7 +82,7 @@ namespace TaskPrint
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(12, 113);
+            this.button1.Location = new System.Drawing.Point(15, 138);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(164, 23);
             this.button1.TabIndex = 9;
@@ -102,11 +103,25 @@ namespace TaskPrint
             this.onlyUnDone.UseVisualStyleBackColor = true;
             this.onlyUnDone.Click += new System.EventHandler(this.onlyUnDone_Click);
             // 
+            // showPhotoCheckbox
+            // 
+            this.showPhotoCheckbox.AutoSize = true;
+            this.showPhotoCheckbox.Checked = true;
+            this.showPhotoCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.showPhotoCheckbox.Location = new System.Drawing.Point(12, 101);
+            this.showPhotoCheckbox.Name = "showPhotoCheckbox";
+            this.showPhotoCheckbox.Size = new System.Drawing.Size(152, 17);
+            this.showPhotoCheckbox.TabIndex = 11;
+            this.showPhotoCheckbox.Text = "Показать фото продукта";
+            this.showPhotoCheckbox.UseVisualStyleBackColor = true;
+            this.showPhotoCheckbox.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1251, 531);
+            this.Controls.Add(this.showPhotoCheckbox);
             this.Controls.Add(this.onlyUnDone);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.CompanyName);
@@ -115,7 +130,7 @@ namespace TaskPrint
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Печать заданий (v1.5.2)";
+            this.Text = "Печать заданий (v1.5.3)";
             this.Load += new System.EventHandler(this.MainForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
@@ -131,6 +146,7 @@ namespace TaskPrint
         private System.Windows.Forms.Label CompanyName;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.CheckBox onlyUnDone;
+        private System.Windows.Forms.CheckBox showPhotoCheckbox;
     }
 }
 

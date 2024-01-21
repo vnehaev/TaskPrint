@@ -1,5 +1,6 @@
 ﻿using iTextSharp.text;
 using iTextSharp.text.pdf;
+using Org.BouncyCastle.Asn1.X509;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -51,7 +52,7 @@ namespace TaskPrint
                     CompanyName.Text = selectedCompany.Name;
                 };
             }   
-            LoadData();
+            //LoadData();
         }
 
 
@@ -223,6 +224,8 @@ namespace TaskPrint
             OrderProcessor processor = new OrderProcessor();
             Company selectedCompany = _appSettings.GetSelectedCompany();
 
+            WildberriesApiService apiService = new WildberriesApiService(selectedCompany);
+
             string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string saveDirectory = Path.Combine(appDirectory, "Reports");
             if (!Directory.Exists(saveDirectory))
@@ -280,7 +283,7 @@ namespace TaskPrint
                     pdfContent.SetFontAndSize(baseFont, 14);
                     pdfContent.ShowTextAligned(Element.ALIGN_LEFT, "Группы", x, y, 0);
                     pdfContent.EndText();
-                    y -= 30;
+                    y -= 20;
 
                     // Loop through group orders
                     foreach (var group in groupOrders.Groups)
@@ -293,13 +296,48 @@ namespace TaskPrint
                         }
                         pdfContent.BeginText();
                         pdfContent.SetFontAndSize(baseFont, 12);
-                        pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({group.Value.Count} шт.) {group.Key}", 40, y, 0);
-                        pdfContent.EndText();
+                        int groupCount = group.Value.Count;
+                        pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({groupCount} шт.) {group.Key}", 40, y, 0);
+                        pdfContent.EndText(); 
                         y -= 20;
                         x = 60;
 
+                        string productPhoto = null;
+                        if (showPhotoCheckbox.Checked == true) {
+                            List<string> ProductCodes = new List<string>();
+                            ProductCodes.Add(group.Value[0].Article);
+                            Data itemInfo = await apiService.GetProductInfo(ProductCodes);
+                            List<string> productPhotos = itemInfo.MediaFiles;
+                            
+                            if (productPhotos.Count > 0) { productPhoto = productPhotos[0]; }
+                        }
+
+                        
+                        //add image from productPhoto url
+                        if (productPhoto != null && showPhotoCheckbox.Checked == true)
+                        {
+                            byte[] imageBytes;
+
+                            using (var webClient = new System.Net.WebClient())
+                            {
+                                imageBytes = webClient.DownloadData(productPhoto);
+                            }
+
+                            Image image = Image.GetInstance(imageBytes);
+                            image.SetAbsolutePosition(x - 10, y - 45);
+                            image.ScaleToFit(60, 60);
+                            doc.Add(image);
+                            y -= 30;
+                            x = 160;
+                        }
+                        else
+                        {
+                            y -= 20;
+                            x = 60;
+                        }
+
                         // Loop through orders in the group
-                        foreach (var order in group.Value)
+                        foreach (Order order in group.Value)
                         {
                             if (y < 60)
                             {
@@ -313,30 +351,73 @@ namespace TaskPrint
                             pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{order.Stickers.PartA} {order.Stickers.PartB}", x, y, 0);
                             x += 100;
                             float pz = doc.PageSize.Width;
-                            if(pz - x < 100) { x = 60; y -= 20; } else { }
+                            if (productPhoto != null && showPhotoCheckbox.Checked == true)
+                            {
+                                if (pz - x < 100) { x = 160; y -= 20; }
+                            }
+                            else
+                            {
+                                if (pz - x < 100) { x = 60; y -= 20; }
+                            }
+                                
+
                             pdfContent.EndText();
                         }
                         global_done += group.Value.Count;
                         
                         pdfContent.BeginText();
                         pdfContent.SetFontAndSize(baseFont, 12);
-                        pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({global_done} / {totalCount})", 40, y-15, 0);
+                        if(groupCount <= 12 && productPhoto != null && showPhotoCheckbox.Checked == true)
+                        {
+                            pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({global_done} / {totalCount})", 40, y - 45, 0);
+                        }
+                        else
+                        {
+                            pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({global_done} / {totalCount})", 40, y - 15, 0);
+                        }
+                        
                         pdfContent.EndText();
 
-                        pdfContent.SetLineWidth(1f);
-                        float x1 =100f;
-                        float x2 = doc.PageSize.Width;
-                        pdfContent.MoveTo(x1, y - 15);
-                        pdfContent.LineTo(x2, y - 15);
-                        pdfContent.Stroke();
+                        if (groupCount <= 12 && productPhoto != null && showPhotoCheckbox.Checked == true)
+                        {
+                            pdfContent.SetLineWidth(1f);
+                            float x1 = 100f;
+                            float x2 = doc.PageSize.Width;
+                            pdfContent.MoveTo(x1, y - 45);
+                            pdfContent.LineTo(x2, y - 45);
+                            pdfContent.Stroke();
+                            y -= 65;
+                        }
+                        else
+                        {
+                            pdfContent.SetLineWidth(1f);
+                            float x1 = 100f;
+                            float x2 = doc.PageSize.Width;
+                            pdfContent.MoveTo(x1, y - 15);
+                            pdfContent.LineTo(x2, y - 15);
+                            pdfContent.Stroke();
+                            y -= 40;
+                        }
 
-
-                        y -= 40;
+                        
                     }
                 }
                 int index = 1;
                 foreach (var order in groupOrders.Other)
                 {
+                    string productPhoto = null;
+                    if (showPhotoCheckbox.Checked == true)
+                    {
+                        List<string> ProductCodes = new List<string>();
+                        ProductCodes.Add(order.Article);
+                        Data itemInfo = await apiService.GetProductInfo(ProductCodes);
+                        List<string> productPhotos = itemInfo.MediaFiles;
+                        if (productPhotos.Count > 0) { productPhoto = productPhotos[0]; }
+                    }
+
+                    
+
+
                     if (y < 20)
                     {
                         // Если осталось мало места на текущей странице, добавляем новую страницу
@@ -344,16 +425,42 @@ namespace TaskPrint
                         y = doc.PageSize.Height - 20;
                     }
                     global_done = global_done + 1;
+                    int startPosition = 40;
+
+                    if(productPhoto != null && showPhotoCheckbox.Checked == true)
+                    {
+                        byte[] imageBytes;
+
+                        using (var webClient = new System.Net.WebClient())
+                        {
+                            imageBytes = webClient.DownloadData(productPhoto);
+                        }
+
+                        Image image = Image.GetInstance(imageBytes);
+                        image.SetAbsolutePosition(x - 10, y - 45);
+                        image.ScaleToFit(60, 60);
+                        doc.Add(image);
+                        startPosition = 80;
+                    }
 
                     pdfContent.BeginText();
                     pdfContent.SetFontAndSize(baseFont, 12);
-                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{index} ({global_done} / {totalCount})", 40, y, 0);
+                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{index} ({global_done} / {totalCount})", startPosition, y, 0);
                     pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{order.Stickers.PartA} {order.Stickers.PartB}", 130, y, 0);
                     pdfContent.ShowTextAligned(Element.ALIGN_LEFT, "☐", 270, y, 0);
                     pdfContent.ShowTextAligned(Element.ALIGN_LEFT, "☐", 370, y, 0);
                     pdfContent.ShowTextAligned(Element.ALIGN_LEFT, order.Article, 450, y, 0);
                     pdfContent.EndText();
-                    y -= 20;
+                    //add image from productPhoto url
+                    if (productPhoto != null && showPhotoCheckbox.Checked == true)
+                    {
+                        y -= 80;
+                    }
+                    else
+                    {
+                        y -= 20;
+                    }
+
                     index++;
                 }
                 doc.Close();
@@ -406,8 +513,9 @@ namespace TaskPrint
                 foreach (Order order in groupOrders.All) {
                     List<string> ProductCodes = new List<string>();
                     ProductCodes.Add(order.Article);
+                    Data itemInfo = await apiService.GetProductInfo(ProductCodes);
 
-                    List<Characteristic> productCaracteristics = await apiService.GetProductInfo(ProductCodes);
+                    List<Characteristic> productCaracteristics = itemInfo.Characteristics;
                     string ProductName = null;
                     foreach (Characteristic characteristic in productCaracteristics) { 
                         if(characteristic.ProductName!= null) { ProductName = characteristic.ProductName; break; }
@@ -495,6 +603,11 @@ namespace TaskPrint
         }
 
         private void onlyUnDone_Click(object sender, EventArgs e)
+        {
+            LoadData();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             LoadData();
         }
