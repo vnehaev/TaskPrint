@@ -256,7 +256,7 @@ namespace TaskPrint
 
                 PdfContentByte pdfContent = writer.DirectContent;
                 float y = doc.PageSize.Height - 60;
-                float x = 40;
+                float x = 30;
 
                 pdfContent.BeginText();
                 pdfContent.SetFontAndSize(baseFont, 16);
@@ -288,28 +288,38 @@ namespace TaskPrint
                     // Loop through group orders
                     foreach (var group in groupOrders.Groups)
                     {
-                        if (y < 120)
+                        Data itemInfo = null;
+                        string ProductName = null;
+                        x = 30;
+                        if (y < 80)
                         {
-                            // Если осталось мало места на текущей странице, добавляем новую страницу
                             doc.NewPage();
                             y = doc.PageSize.Height - 60;
                         }
                         pdfContent.BeginText();
                         pdfContent.SetFontAndSize(baseFont, 12);
                         int groupCount = group.Value.Count;
-                        pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({groupCount} шт.) {group.Key}", 40, y, 0);
+                        pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({groupCount} шт.) {group.Key}", x, y, 0);
                         pdfContent.EndText(); 
                         y -= 20;
-                        x = 60;
+ 
 
                         string productPhoto = null;
                         if (showPhotoCheckbox.Checked == true) {
                             List<string> ProductCodes = new List<string>();
                             ProductCodes.Add(group.Value[0].Article);
-                            Data itemInfo = await apiService.GetProductInfo(ProductCodes);
+                            itemInfo = await apiService.GetProductInfo(ProductCodes);
                             List<string> productPhotos = itemInfo.MediaFiles;
                             
                             if (productPhotos.Count > 0) { productPhoto = productPhotos[0]; }
+
+                            List<Characteristic> productCaracteristics = itemInfo.Characteristics;
+
+
+                            foreach (Characteristic characteristic in productCaracteristics)
+                            {
+                                if (characteristic.ProductName != null) { ProductName = characteristic.ProductName; break; }
+                            }
                         }
 
                         
@@ -324,7 +334,7 @@ namespace TaskPrint
                             }
 
                             Image image = Image.GetInstance(imageBytes);
-                            image.SetAbsolutePosition(x - 10, y - 45);
+                            image.SetAbsolutePosition(x, y - 45);
                             image.ScaleToFit(60, 60);
                             doc.Add(image);
                             y -= 30;
@@ -332,8 +342,34 @@ namespace TaskPrint
                         }
                         else
                         {
-                            y -= 20;
-                            x = 60;
+                            y -= 10;
+                            x = 40;
+                        }
+
+                        //if is set size and name add to pdf nearby image
+                        if (productPhoto != null && showPhotoCheckbox.Checked == true)
+                        {
+                            float mainY = y + 30;
+                            if (itemInfo.Sizes.Count > 0)
+                            {
+                                mainY = y + 50;
+                                if(itemInfo.Sizes[0].TechnicalSize != "0" && itemInfo.Sizes[0].TechnicalSize != null)
+                                {
+                                    pdfContent.BeginText();
+                                    pdfContent.SetFontAndSize(baseFont, 12);
+                                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{itemInfo.Sizes[0].TechnicalSize}", x, mainY, 0);
+                                    pdfContent.EndText();
+                                    mainY = mainY - 10;
+                                }
+                            }
+
+                            if (ProductName != null)
+                            {
+                                pdfContent.BeginText();
+                                pdfContent.SetFontAndSize(baseFont, 12);
+                                pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{ProductName}", x, mainY, 0);
+                                pdfContent.EndText();
+                            }
                         }
 
                         // Loop through orders in the group
@@ -369,11 +405,11 @@ namespace TaskPrint
                         pdfContent.SetFontAndSize(baseFont, 12);
                         if(groupCount <= 12 && productPhoto != null && showPhotoCheckbox.Checked == true)
                         {
-                            pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({global_done} / {totalCount})", 40, y - 45, 0);
+                            pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({global_done} / {totalCount})", 30, y - 35, 0);
                         }
                         else
                         {
-                            pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({global_done} / {totalCount})", 40, y - 15, 0);
+                            pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"({global_done} / {totalCount})", 30, y - 15, 0);
                         }
                         
                         pdfContent.EndText();
@@ -381,7 +417,7 @@ namespace TaskPrint
                         if (groupCount <= 12 && productPhoto != null && showPhotoCheckbox.Checked == true)
                         {
                             pdfContent.SetLineWidth(1f);
-                            float x1 = 100f;
+                            float x1 = 0;
                             float x2 = doc.PageSize.Width;
                             pdfContent.MoveTo(x1, y - 45);
                             pdfContent.LineTo(x2, y - 45);
@@ -391,7 +427,7 @@ namespace TaskPrint
                         else
                         {
                             pdfContent.SetLineWidth(1f);
-                            float x1 = 100f;
+                            float x1 = 80;
                             float x2 = doc.PageSize.Width;
                             pdfContent.MoveTo(x1, y - 15);
                             pdfContent.LineTo(x2, y - 15);
@@ -406,26 +442,41 @@ namespace TaskPrint
                 foreach (var order in groupOrders.Other)
                 {
                     string productPhoto = null;
+                    Data itemInfo = null;
+                    string Name = null;
+                    string Size = null;
+
                     if (showPhotoCheckbox.Checked == true)
                     {
                         List<string> ProductCodes = new List<string>();
                         ProductCodes.Add(order.Article);
-                        Data itemInfo = await apiService.GetProductInfo(ProductCodes);
+                        itemInfo = await apiService.GetProductInfo(ProductCodes);
                         List<string> productPhotos = itemInfo.MediaFiles;
                         if (productPhotos.Count > 0) { productPhoto = productPhotos[0]; }
+                        List<Characteristic> productCaracteristics = itemInfo.Characteristics;
+
+                        foreach (Characteristic characteristic in productCaracteristics)
+                        {
+                            if (characteristic.ProductName != null) { Name = characteristic.ProductName; break; }
+                        }
                     }
 
-                    
 
 
-                    if (y < 20)
+                    int pageRemeins = 40;
+                    if (productPhoto != null && showPhotoCheckbox.Checked == true)
                     {
-                        // Если осталось мало места на текущей странице, добавляем новую страницу
+                        pageRemeins = 60;
+                    }
+
+
+                        if (y < pageRemeins)
+                    {
                         doc.NewPage();
                         y = doc.PageSize.Height - 20;
                     }
                     global_done = global_done + 1;
-                    int startPosition = 40;
+                    int startPosition = 30;
 
                     if(productPhoto != null && showPhotoCheckbox.Checked == true)
                     {
@@ -437,19 +488,47 @@ namespace TaskPrint
                         }
 
                         Image image = Image.GetInstance(imageBytes);
-                        image.SetAbsolutePosition(x - 10, y - 45);
+                        image.SetAbsolutePosition(startPosition , y - 50);
                         image.ScaleToFit(60, 60);
                         doc.Add(image);
-                        startPosition = 80;
+                        startPosition = 90;
+                    }
+
+                    if (productPhoto != null && showPhotoCheckbox.Checked == true)
+                    {
+                        float mainY = y + 30;
+                        if (itemInfo.Sizes.Count > 0)
+                        {
+                            mainY = y + 50;
+                            
+                            if (itemInfo.Sizes[0].TechnicalSize != "0" && itemInfo.Sizes[0].TechnicalSize != null)
+                            {
+                                Size = itemInfo.Sizes[0].TechnicalSize;
+                                mainY = mainY - 10;
+                            }
+                        }
                     }
 
                     pdfContent.BeginText();
                     pdfContent.SetFontAndSize(baseFont, 12);
-                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{index} ({global_done} / {totalCount})", startPosition, y, 0);
-                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{order.Stickers.PartA} {order.Stickers.PartB}", 130, y, 0);
-                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, "☐", 270, y, 0);
-                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, "☐", 370, y, 0);
-                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, order.Article, 450, y, 0);
+                    float diffY = 20;
+                    // add Size if exist and Name allways to next line
+                    if (Size != null)
+                    {
+                        pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"Размер: {Size} ", startPosition, y, 0);
+                        pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{Name}", startPosition, y - diffY, 0);
+                        diffY = 40;
+                    }
+                    else
+                    {
+                        pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{Name}", startPosition, y, 0);
+                        
+                    }
+                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{index} ({global_done} / {totalCount})", startPosition, y- diffY, 0);
+                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, $"{order.Stickers.PartA} {order.Stickers.PartB}", startPosition + 75, y - diffY, 0);
+                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, "☐", startPosition + 210, y - diffY, 0);
+                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, "☐", startPosition + 310, y - diffY, 0);
+                    pdfContent.ShowTextAligned(Element.ALIGN_LEFT, order.Article, startPosition + 390, y - diffY, 0);
                     pdfContent.EndText();
                     //add image from productPhoto url
                     if (productPhoto != null && showPhotoCheckbox.Checked == true)
